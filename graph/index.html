@@ -1,0 +1,97 @@
+<!DOCTYPE HTML PUBLIC "Smart Farming">
+<html>
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>PH Chart</title>
+
+
+	<!-- 1. Add these JavaScript inclusions in the head of your page -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script src="https://code.highcharts.com/stock/highstock.js"></script>
+	<script src="https://code.highcharts.com/highcharts.js"></script>
+	<script src="https://code.highcharts.com/modules/data.js"></script>
+	<script src="https://code.highcharts.com/modules/exporting.js"></script>
+
+
+	<!-- 2. Add the JavaScript to initialize the chart on document ready -->
+	<script>
+		var chart; // global
+		/**
+		 * Request data from the server, add it to the graph and set a timeout to request again
+		 */
+		function requestData() {
+			$.ajax({
+				url: 'live-server-data.php',
+				success: function(point) {
+					var series = chart.series[0],
+						shift = series.data.length > 20; // shift if the series is longer than 20
+
+					// add the point
+					chart.series[0].addPoint(eval(point), true, shift);
+					// call it again after one second
+					setTimeout(requestData, 2000);
+				},
+				cache: false
+			});
+		}
+
+		$(document).ready(function() {
+			chart = new Highcharts.Chart({
+				chart: {
+					renderTo: 'container',
+					defaultSeriesType: 'spline',
+					events: {
+						load: requestData
+					}
+				},
+				title: {
+					text: 'Real Time Grafik Sensor PH'
+				},
+				xAxis: {
+					type: 'datetime',
+					tickPixelInterval: 150,
+					maxZoom: 20 * 1000
+				},
+				yAxis: {
+					minPadding: 0.2,
+					maxPadding: 0.2,
+					title: {
+
+						text: "pH " + String.fromCharCode(176) + "",
+						margin: 180
+					}
+				},
+				series: [{
+					name: 'PH',
+					data: []
+				}]
+			});
+		});
+	</script>
+	<script>
+		window.watsonAssistantChatOptions = {
+			integrationID: "ddab9cf9-b417-4e31-bbd0-9e9cbb2be47b", // The ID of this integration.
+			region: "us-south", // The region your integration is hosted in.
+			serviceInstanceID: "de86534b-1534-4daf-bb81-f10e2f890694", // The ID of your service instance.
+			onLoad: function(instance) {
+				instance.render();
+			}
+		};
+		setTimeout(function() {
+			const t = document.createElement('script');
+			t.src = "https://web-chat.global.assistant.watson.appdomain.cloud/versions/" + (window.watsonAssistantChatOptions.clientVersion || 'latest') + "/WatsonAssistantChatEntry.js";
+			document.head.appendChild(t);
+		});
+	</script>
+</head>
+
+<body>
+
+	<!-- 3. Add the container -->
+	<div id="container" style="width: 1024px; height: 700px; margin: 0 auto"></div>
+
+
+</body>
+
+</html>
